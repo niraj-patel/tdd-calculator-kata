@@ -23,11 +23,17 @@ describe("Calculator", () => {
     expect(calculator.add("1, 5, 4")).toBe(10);
   });
 
-  it("should be able to handle \n instead of comma", () => {
+  it('should be able to handle \\n instead of comma', () => {
     expect(calculator.add("1\n5, 4")).toBe(10);
   });
 
   it("should be able to support different delimeters", () => {
     expect(calculator.add("//;\n1;2")).toBe(3);
-  })
+  });
+
+  it("should throw error when negative numbers provided", () => {
+    expect(() => {
+      calculator.add("1,2,3,-1,1,-5");
+    }).toThrow("Negative numbers not allowed: -1,-5");
+  });
 });
