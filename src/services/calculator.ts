@@ -6,23 +6,45 @@ export class Calculator {
     return negativeNumbers;
   }
 
+  private escapeRegex(delimiter: string): string {
+    return delimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
   private parseDelimeterAndNumber(input: string): {
     delimeter: RegExp;
     values: string;
   } {
-    let delimeter = /,|\n/;
+    let delimeters = [",", "\n"];
     let numbers = input;
 
+    // checks whether any custom delimeter is present or not
     if (input.startsWith("//")) {
-      const matchedDelimeter = input.match(/^\/\/(.+)\n/);
+      // extract custom delimeters
+      const matchedDelimeters = input.match(/^\/\/(.*?)\n/);
 
-      if (matchedDelimeter) {
-        delimeter = new RegExp(matchedDelimeter[1]);
-        numbers = input.substring(matchedDelimeter[0].length);
+      if (matchedDelimeters!.length > 0) {
+        const rawDelimiters = matchedDelimeters![1];
+
+        // checks whether delimeters are inside square brackets
+        if (rawDelimiters.startsWith("[") && rawDelimiters.endsWith("]")) {
+          // return array of extracted delimeters in square brackets
+          // For ex: ['[*]', '[%]']
+          const dlms = rawDelimiters.match(/\[([^\]]+)\]/g);
+          // remove square brackets from delimeters
+          delimeters = dlms?.map((d) => d.slice(1, -1)) || [];
+        } else {
+          delimeters = [rawDelimiters];
+        }
+        numbers = input.substring(matchedDelimeters![0].length);
       }
     }
 
-    return { delimeter, values: numbers! };
+    // convert array of delimeters to regex string
+    const delimiterRegex = new RegExp(
+      delimeters.map(this.escapeRegex).join("|")
+    );
+
+    return { delimeter: delimiterRegex, values: numbers! };
   }
 
   add(input?: string): number {
