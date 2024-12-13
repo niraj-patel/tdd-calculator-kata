@@ -26,4 +26,8 @@ describe("Calculator", () => {
   it("should be able to handle \n instead of comma", () => {
     expect(calculator.add("1\n5, 4")).toBe(10);
   });
+
+  it("should be able to support different delimeters", () => {
+    expect(calculator.add("//;\n1;2")).toBe(3);
+  })
 });
