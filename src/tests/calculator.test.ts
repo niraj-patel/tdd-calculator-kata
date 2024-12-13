@@ -22,4 +22,8 @@ describe("Calculator", () => {
   it("should take multiple input string and return total in result", () => {
     expect(calculator.add("1, 5, 4")).toBe(10);
   });
+
+  it("should be able to handle \n instead of comma", () => {
+    expect(calculator.add("1\n5, 4")).toBe(10);
+  });
 });
