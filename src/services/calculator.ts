@@ -1,3 +1,9 @@
+import {
+  ESCAPE_REGEX_REPLACE_VALUE,
+  ESCAPE_REGEX_SEARCH_VALUE,
+  MATCH_DELIMETERS_REGEX,
+  EXTRACT_DELIMETERS,
+} from "../utils/constant";
 export class Calculator {
   constructor() {}
 
@@ -7,7 +13,25 @@ export class Calculator {
   }
 
   private escapeRegex(delimiter: string): string {
-    return delimiter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return delimiter.replace(
+      ESCAPE_REGEX_SEARCH_VALUE,
+      ESCAPE_REGEX_REPLACE_VALUE
+    );
+  }
+
+  private add(numberArr: number[]): number {
+    return numberArr.reduce((a, b) => {
+      if (b > 1000) {
+        b = 0;
+      }
+      return a + b;
+    }, 0);
+  }
+
+  private multiply(numberArr: number[]): number {
+    return numberArr.reduce((a, b) => {
+      return a * b;
+    }, 1);
   }
 
   private parseDelimeterAndNumber(input: string): {
@@ -20,7 +44,7 @@ export class Calculator {
     // checks whether any custom delimeter is present or not
     if (input.startsWith("//")) {
       // extract custom delimeters
-      const matchedDelimeters = input.match(/^\/\/(.*?)\n/);
+      const matchedDelimeters = input.match(MATCH_DELIMETERS_REGEX);
 
       if (matchedDelimeters!.length > 0) {
         const rawDelimiters = matchedDelimeters![1];
@@ -29,7 +53,7 @@ export class Calculator {
         if (rawDelimiters.startsWith("[") && rawDelimiters.endsWith("]")) {
           // return array of extracted delimeters in square brackets
           // For ex: ['[*]', '[%]']
-          const dlms = rawDelimiters.match(/\[([^\]]+)\]/g);
+          const dlms = rawDelimiters.match(EXTRACT_DELIMETERS);
           // remove square brackets from delimeters
           delimeters = dlms?.map((d) => d.slice(1, -1)) || [];
         } else {
@@ -47,7 +71,7 @@ export class Calculator {
     return { delimeter: delimiterRegex, values: numbers! };
   }
 
-  add(input?: string): number {
+  calculate(input?: string): number {
     if (!input) {
       return 0;
     }
@@ -61,12 +85,14 @@ export class Calculator {
         `Negative numbers not allowed: ${negativeNumbers.join(",")}`
       );
     }
-    const total = numberArr.reduce((a, b) => {
-      if (b > 1000) {
-        b = 0;
-      }
-      return a + b;
-    }, 0);
-    return total;
+
+    let result: number;
+    // check whether delimeter equals * then go for multiplication
+    if (delimeter.test("*")) {
+      result = this.multiply(numberArr);
+    } else {
+      result = this.add(numberArr);
+    }
+    return result!;
   }
 }
